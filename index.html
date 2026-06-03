@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronomicro Vertical Infra - Mirante Belvedere</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
+#app{max-width:1440px;margin:0 auto;padding:16px}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);color:#fff;border-radius:14px;overflow:hidden;margin-bottom:16px}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 14px;gap:20px}
+.header-left{flex:1;min-width:0}
+header h1{font-size:17px;font-weight:700;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11px;color:#6C8EBF;margin-top:4px}
+.header-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 22px;border-top:1px solid rgba(255,255,255,0.07);background:rgba(0,0,0,0.18)}
+
+/* LOGOS — canto direito */
+.logos-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+/* Mirante Belvedere chip */
+.logo-mirante-chip{background:#181818;border-radius:10px;padding:9px 16px;text-align:center;border:1px solid rgba(201,169,110,0.25);min-width:120px}
+.mirante-name{font-family:'Nunito',sans-serif;font-weight:900;font-size:22px;color:#C9A96E;line-height:1;letter-spacing:-0.5px}
+.mirante-line{height:1px;background:rgba(255,255,255,0.35);margin:5px 0}
+.mirante-sub{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9.5px;color:#e8e8e8;letter-spacing:3.5px}
+
+.date-group{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);padding:7px 12px;border-radius:8px}
+.date-group label{font-size:11px;color:#aaa}
+.date-group input[type=date]{background:transparent;border:none;color:#fff;font-size:13px;outline:none;cursor:pointer}
+.date-group input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);cursor:pointer}
+.btn{padding:7px 14px;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;transition:all .2s;white-space:nowrap}
+.btn-weather{background:#0277BD;color:#fff}
+.btn-weather:hover{background:#01579B}
+.btn-toggle{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.btn-toggle:hover{background:rgba(255,255,255,.25)}
+.btn-toggle.active{background:#388E3C;border-color:#388E3C}
+.btn-reset{background:#c62828;color:#fff;border:none}
+.btn-reset:hover{background:#b71c1c}
+
+/* ERROR BANNER */
+#errorBanner{display:none;background:#ffebee;border:1px solid #ef9a9a;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#c62828;font-size:13px}
+
+/* WEATHER */
+#weatherWidget{background:#fff;border-radius:14px;padding:16px 20px;margin-bottom:16px;box-shadow:0 1px 6px rgba(0,0,0,.08);min-height:60px}
+.weather-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.weather-title{font-size:13px;font-weight:700;color:#444}
+.weather-loc{font-size:11px;color:#999;margin-top:2px}
+.weather-ts{font-size:10px;color:#bbb}
+.weather-days{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.wd{flex:0 0 auto;width:88px;background:#f8f9fa;border-radius:10px;padding:10px 8px;text-align:center;border:2px solid transparent;transition:border .2s}
+.wd.today{border-color:#1565C0;background:#E3F2FD}
+.wd.rain-warn{border-color:#E65100;background:#FFF3E0}
+.wd-date{font-size:10px;color:#888;margin-bottom:3px}
+.wd-icon{font-size:24px;margin:4px 0}
+.wd-desc{font-size:9px;color:#777;margin-bottom:4px;height:26px;line-height:1.3;display:flex;align-items:center;justify-content:center}
+.wd-temp{font-size:12px;font-weight:700;color:#333}
+.wd-rain{font-size:11px;color:#1565C0;margin-top:3px}
+.wd-rain.hi{color:#E65100;font-weight:700}
+.weather-msg{text-align:center;color:#aaa;padding:16px;font-size:13px}
+.weather-alert{background:#FFF3E0;border:1px solid #FFB74D;border-radius:8px;padding:8px 12px;font-size:12px;color:#E65100;margin-top:10px;display:flex;align-items:center;gap:6px}
+
+/* PHASE CARDS */
+#phaseCards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.phase-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-top:4px solid}
+.pc-label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#888;margin-bottom:4px}
+.pc-value{font-size:22px;font-weight:800;margin:4px 0}
+.pc-meta{font-size:11px;color:#999;margin-bottom:10px}
+.pc-bar-bg{height:8px;background:#eee;border-radius:4px;overflow:hidden;margin-bottom:6px}
+.pc-bar-fill{height:8px;border-radius:4px;transition:width .5s}
+.pc-stats{display:flex;justify-content:space-between;font-size:11px}
+.pc-done{color:#388E3C;font-weight:600}
+.pc-left{color:#999}
+.stats-card{background:#37474F;color:#fff;border-top-color:#607D8B}
+.stats-card .pc-label{color:#90A4AE}
+.stats-card .pc-value{font-size:18px}
+.stats-card .pc-meta{color:#78909C}
+.stats-card .pc-stats span{color:#90A4AE}
+
+/* TABLE SECTION */
+.table-section{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.08);overflow:hidden;margin-bottom:16px}
+.table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #f0f0f0;flex-wrap:wrap;gap:8px}
+.table-toolbar-title{font-size:14px;font-weight:700;color:#333}
+.toolbar-right{display:flex;align-items:center;gap:8px}
+.btn-sm{padding:5px 10px;border-radius:6px;border:1px solid #ddd;background:#fff;font-size:11px;font-weight:600;cursor:pointer;color:#555}
+.btn-sm:hover{background:#f5f5f5}
+.tip{font-size:11px;color:#aaa}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:#1a1a2e;color:#fff}
+thead th{padding:10px 12px;text-align:left;font-weight:600;font-size:11px;letter-spacing:.3px;white-space:nowrap}
+th.th-drag{width:28px}
+th.th-chk{width:34px}
+
+tbody tr{border-bottom:1px solid #f2f2f2;transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tr.canaleta-row{background:#E3F2FD;border-left:4px solid #1565C0}
+tr.calcada-row{background:#F5F5F5;border-left:4px solid #90A4AE}
+tr.grama-row{background:#E8F5E9;border-left:4px solid #2E7D32}
+tr.rain-row{background:#ECEFF1;border-left:4px solid #90A4AE}
+tr.section-row td{background:#37474F;color:#fff;font-weight:700;font-size:11px;padding:6px 12px;text-transform:uppercase;letter-spacing:.5px;border-bottom:none}
+tr.done-row{opacity:0.5;background:#f9f9f9 !important;border-left-color:#ccc !important}
+tr.done-row td{color:#aaa !important}
+tr.done-row .td-act{text-decoration:line-through}
+
+tr.dragging{opacity:.3}
+tr.drag-over-top{border-top:3px solid #1565C0 !important}
+
+td{padding:9px 12px;vertical-align:middle}
+td.td-drag{color:#ccc;font-size:18px;cursor:grab;text-align:center;width:28px;padding:9px 4px;user-select:none}
+tr.rain-row td.td-drag,tr.section-row td.td-drag{cursor:default}
+td.td-chk{text-align:center;padding:9px 6px;width:34px}
+.chk{width:16px;height:16px;cursor:pointer;accent-color:#388E3C}
+td.td-num{color:#bbb;font-size:11px;width:30px}
+td.td-date{white-space:nowrap}
+td.td-day{color:#777}
+td.td-act{font-weight:600}
+td.td-prod{font-family:'Courier New',monospace;font-size:12px;white-space:nowrap}
+td.td-acum{font-family:'Courier New',monospace;font-size:12px;color:#666;white-space:nowrap}
+
+/* Badges */
+.badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;margin-left:5px;vertical-align:middle}
+.b-pending{background:#FFF3E0;color:#E65100;border:1px solid #FFCC80}
+.b-overdue{background:#FFEBEE;color:#C62828;border:1px solid #EF9A9A;animation:blink 2s infinite}
+.b-done{background:#E8F5E9;color:#2E7D32;border:1px solid #A5D6A7}
+.b-last{background:#EDE7F6;color:#4527A0;border:1px solid #CE93D8;font-size:9px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* Mini bar */
+.mbar-bg{background:#e0e0e0;border-radius:3px;height:7px;overflow:hidden;min-width:80px}
+.mbar-fill{height:7px;border-radius:3px;transition:width .3s}
+.pct-txt{font-size:11px;font-weight:700;margin-left:5px;white-space:nowrap}
+
+/* COMPLETED SECTION */
+#completedSection{background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden;margin-bottom:16px;display:none}
+#completedSection.show{display:block}
+.done-hdr{padding:12px 16px;background:#388E3C;color:#fff;font-weight:700;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.done-item{padding:9px 16px;border-bottom:1px solid #f0f0f0;font-size:12px;display:flex;align-items:center;gap:10px;color:#666}
+.done-item:last-child{border-bottom:none}
+.btn-undo{background:none;border:1px solid #ddd;border-radius:4px;padding:2px 7px;font-size:10px;cursor:pointer;color:#999}
+.btn-undo:hover{background:#FFEBEE;color:#c62828;border-color:#ef9a9a}
+
+/* PRIORITY PANEL */
+.priority-panel{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.08);margin-bottom:16px;overflow:hidden}
+.pp-header{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#1a1a2e;color:#fff}
+.pp-title{font-size:13px;font-weight:700;letter-spacing:.2px}
+.pp-hint{font-size:10px;color:#6C8EBF}
+.pp-cards{display:flex;gap:0;overflow-x:auto}
+.pp-card{flex:1;min-width:180px;padding:14px 18px;border-right:1px solid #f0f0f0;position:relative;transition:background .15s}
+.pp-card:last-child{border-right:none}
+.pp-card-phase{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#999;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.pp-card-activity{font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:3px}
+.pp-card-meta{font-size:11px;color:#888;margin-bottom:8px}
+.pp-card-date{display:inline-block;font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;background:#f0f4ff;color:#1565C0}
+.pp-card-date.today{background:#FFF3E0;color:#E65100}
+.pp-card-date.overdue{background:#FFEBEE;color:#C62828}
+.pp-card-done{text-align:center;color:#bbb;font-size:12px;padding:20px 0;width:100%}
+.pp-empty{padding:18px;text-align:center;color:#bbb;font-size:12px}
+
+/* Promote button */
+.btn-promote{background:none;border:1px solid #ddd;border-radius:5px;padding:3px 6px;cursor:pointer;font-size:13px;color:#888;line-height:1;transition:all .15s;display:block;margin:0 auto}
+.btn-promote:hover{background:#1a1a2e;color:#fff;border-color:#1a1a2e}
+th.th-prio{width:30px}
+td.td-prio{text-align:center;padding:6px 4px;width:30px}
+tr.done-row .btn-promote{opacity:0;pointer-events:none}
+
+footer{text-align:center;font-size:10px;color:#bbb;padding:8px 0 16px}
+
+@media(max-width:700px){
+  thead th:nth-child(8),thead th:nth-child(9),thead th:nth-child(10){display:none}
+  td:nth-child(8),td:nth-child(9),td:nth-child(10){display:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<header>
+  <div class="header-inner">
+    <div class="header-left">
+      <h1>Cronomicro Vertical Infra — Mirante Belvedere</h1>
+      <div class="sub">Método Industrial com Metas Diárias · Equipe: 2 Pedreiros + 1 Ajudante · Seg–Sáb</div>
+    </div>
+    <div class="logos-right">
+      <div class="logo-mirante-chip">
+        <div class="mirante-name">mirante</div>
+        <div class="mirante-line"></div>
+        <div class="mirante-sub">BELVEDERE</div>
+      </div>
+    </div>
+  </div>
+  <div class="header-controls">
+    <div class="date-group">
+      <label>Início:</label>
+      <input type="date" id="startDateInput" value="2026-05-19">
+    </div>
+    <button class="btn btn-weather" onclick="fetchWeather()">🔄 Atualizar Tempo</button>
+    <button class="btn btn-reset" onclick="resetAll()">🗑 Reset</button>
+  </div>
+</header>
+
+<div id="errorBanner"></div>
+<div id="weatherWidget"><div class="weather-msg">🌤️ Carregando previsão do tempo...</div></div>
+<div id="phaseCards"></div>
+
+<div class="priority-panel">
+  <div class="pp-header">
+    <span class="pp-title">📌 Próximos na Fila — Clique ⬆ na tarefa para subir ao topo</span>
+    <span class="pp-hint">Atualiza automaticamente</span>
+  </div>
+  <div class="pp-cards" id="priorityCards"></div>
+</div>
+
+<div class="table-section">
+  <div class="table-toolbar">
+    <div class="table-toolbar-title">📅 Cronograma de Execução Diário</div>
+    <div class="toolbar-right">
+      <button class="btn-sm" onclick="resetOrder()">↺ Restaurar Ordem</button>
+      <span class="tip">Arraste ⠿ para reordenar</span>
+    </div>
+  </div>
+  <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th class="th-prio">⬆</th>
+          <th class="th-drag">⠿</th>
+          <th class="th-chk">✓</th>
+          <th>#</th>
+          <th>Data</th>
+          <th>Dia</th>
+          <th>Atividade</th>
+          <th>Produção</th>
+          <th>Acumulado</th>
+          <th>%</th>
+          <th style="width:140px">Progresso</th>
+        </tr>
+      </thead>
+      <tbody id="scheduleBody"></tbody>
+    </table>
+  </div>
+</div>
+
+
+<footer>📍 Rua Eduardo Antonio Amorim, 141 — Recife/PE · Gerado em <span id="genDate"></span></footer>
+</div>
+
+<script>
+"use strict";
+
+// ==================== CONFIG ====================
+var PHASES = [
+  { id:'canaleta', name:'Canaleta de Drenagem', total:345,    unit:'m',  rate:14, color:'#1565C0', bg:'#E3F2FD', emoji:'🔵' },
+  { id:'calcada',  name:'Calçada 1,20m',         total:321.67, unit:'m',  rate:13, color:'#607D8B', bg:'#F5F5F5', emoji:'🩶' },
+  { id:'grama',    name:'Assentamento de Grama', total:3085,   unit:'m²', rate:70, color:'#2E7D32', bg:'#E8F5E9', emoji:'🟢' }
+];
+
+var DAYS_PT   = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+var MONTHS_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+var LAT = -8.0476, LON = -34.8770;
+
+// ==================== STATE ====================
+var state = {
+  startDate: '2026-05-19',
+  taskOrder: null,
+  completed: {},   // id -> true
+  showDone: false,
+  schedule: []
+};
+
+function loadState() {
+  try { state.startDate  = localStorage.getItem('cmv_start') || '2026-05-19'; } catch(e){}
+  try { state.taskOrder  = JSON.parse(localStorage.getItem('cmv_order'));     } catch(e){}
+  try { state.completed  = JSON.parse(localStorage.getItem('cmv_done')) || {}; } catch(e){}
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('cmv_start', state.startDate);
+    localStorage.setItem('cmv_order', JSON.stringify(state.taskOrder));
+    localStorage.setItem('cmv_done',  JSON.stringify(state.completed));
+  } catch(e){}
+}
+
+// ==================== RAIN DAY ====================
+function isRainDay(date) {
+  var m = date.getMonth() + 1;
+  var dow = date.getDay();
+  if (dow === 0 || dow === 6) return false;
+
+  var startOfYear = new Date(date.getFullYear(), 0, 1);
+  var weekNum = Math.floor((date - startOfYear) / (7 * 86400000));
+  var odd = (weekNum % 2 === 1);
+
+  // dow: 1=Mon 2=Tue 3=Wed 4=Thu 5=Fri
+  if (m === 5) return dow === 3;                           // May: Wed
+  if (m === 6) return odd ? (dow===2||dow===5) : (dow===3||dow===5); // Jun: 2/wk
+  if (m === 7) return odd ? dow===4 : dow===3;             // Jul: 1/wk alt
+  if (m === 8) return dow===5 && date.getDate() <= 22;    // Aug: Fri until 22
+  return false;
+}
+
+// ==================== DEFAULT ORDER ====================
+function makeDefaultOrder() {
+  var order = [];
+  PHASES.forEach(function(ph) {
+    var totalDays = Math.ceil(ph.total / ph.rate);
+    for (var d = 1; d <= totalDays; d++) {
+      order.push({ id: ph.id+'_'+d, phaseId: ph.id, dayNum: d, totalDays: totalDays });
+    }
+  });
+  return order;
+}
+
+// ==================== BUILD SCHEDULE ====================
+function buildSchedule(startStr, taskOrder) {
+  var totalTasks = taskOrder.length;
+
+  // Generate calendar slots (task slots + rain interruptions)
+  var slots = [];
+  var d = new Date(startStr + 'T12:00:00'); // noon to avoid DST issues
+  // advance to Monday
+  while (d.getDay() !== 1) { d.setDate(d.getDate() + 1); }
+
+  var needed = totalTasks;
+  var safety = 0;
+  while (needed > 0 && safety < 500) {
+    safety++;
+    // skip Sunday only (Sat is workday)
+    while (d.getDay() === 0) { d.setDate(d.getDate() + 1); }
+
+    slots.push({ type:'task', date: new Date(d.getTime()) });
+    needed--;
+    d.setDate(d.getDate() + 1);
+  }
+
+  // Assign tasks to slots
+  var schedule = [];
+  var tIdx = 0;
+  for (var i = 0; i < slots.length; i++) {
+    var slot = slots[i];
+    {
+      var task = taskOrder[tIdx++];
+      var ph = null;
+      for (var pi = 0; pi < PHASES.length; pi++) {
+        if (PHASES[pi].id === task.phaseId) { ph = PHASES[pi]; break; }
+      }
+      if (!ph) continue;
+      var lastProd = parseFloat((ph.total - (task.totalDays - 1) * ph.rate).toFixed(2));
+      var prod = (task.dayNum === task.totalDays) ? lastProd : ph.rate;
+      var accum = parseFloat(Math.min(task.dayNum * ph.rate, ph.total).toFixed(2));
+      schedule.push({
+        id: task.id,
+        type: 'task',
+        date: slot.date,
+        phaseId: task.phaseId,
+        dayNum: task.dayNum,
+        totalDays: task.totalDays,
+        production: prod,
+        accumulated: accum,
+        total: ph.total,
+        pct: parseFloat((accum / ph.total * 100).toFixed(1)),
+        isLast: task.dayNum === task.totalDays,
+        phase: ph
+      });
+    }
+  }
+  return schedule;
+}
+
+// ==================== HELPERS ====================
+function fmtISO(d) { return d.toISOString().split('T')[0]; }
+
+function fmtDate(d) {
+  var dd = String(d.getDate()).padStart('0',2);
+  var mm = String(d.getMonth()+1).padStart('0',2);
+  return dd+'/'+mm+'/'+d.getFullYear();
+}
+
+// Polyfill for padStart (older envs)
+if (!String.prototype.padStart) {
+  String.prototype.padStart = function(len, fill) {
+    var s = String(this);
+    while (s.length < len) s = fill + s;
+    return s;
+  };
+}
+
+function fmtNum(n) {
+  return String(n).replace('.', ',');
+}
+
+function lastItem(arr) {
+  return arr.length ? arr[arr.length - 1] : null;
+}
+
+// ==================== RENDER CARDS ====================
+function renderCards() {
+  var container = document.getElementById('phaseCards');
+  if (!container) return;
+  var html = '';
+
+  PHASES.forEach(function(ph) {
+    var phaseTasks = state.taskOrder.filter(function(t){ return t.phaseId === ph.id; });
+    var doneTasks  = phaseTasks.filter(function(t){ return !!state.completed[t.id]; });
+
+    var doneQty = 0;
+    doneTasks.forEach(function(t) {
+      var lp = parseFloat((ph.total - (t.totalDays - 1) * ph.rate).toFixed(2));
+      doneQty += (t.dayNum === t.totalDays ? lp : ph.rate);
+    });
+    doneQty = parseFloat(doneQty.toFixed(2));
+
+    var remaining = parseFloat((ph.total - doneQty).toFixed(2));
+    var pct = phaseTasks.length ? parseFloat((doneTasks.length / phaseTasks.length * 100).toFixed(1)) : 0;
+    var daysLeft = phaseTasks.length - doneTasks.length;
+
+    html += '<div class="phase-card" style="border-top-color:'+ph.color+'">'
+      + '<div class="pc-label">'+ph.emoji+' '+ph.name+'</div>'
+      + '<div class="pc-value" style="color:'+ph.color+'">'+fmtNum(remaining)+' <small style="font-size:13px;font-weight:400">'+ph.unit+'</small></div>'
+      + '<div class="pc-meta">Meta: '+ph.rate+ph.unit+'/dia &nbsp;·&nbsp; '+phaseTasks.length+' dias produtivos</div>'
+      + '<div class="pc-bar-bg"><div class="pc-bar-fill" style="width:'+pct+'%;background:'+ph.color+'"></div></div>'
+      + '<div class="pc-stats"><span class="pc-done">✓ '+doneTasks.length+' dias ('+fmtNum(doneQty)+ph.unit+')</span>'
+      + '<span class="pc-left">'+daysLeft+' restantes · '+pct+'%</span></div>'
+      + '</div>';
+  });
+
+  // Stats card
+  var totalTasks = state.taskOrder.length;
+  var totalDone  = Object.keys(state.completed).filter(function(k){ return !!state.completed[k]; }).length;
+  var taskItems  = state.schedule.filter(function(s){ return s.type==='task'; });
+  var last       = lastItem(taskItems);
+  var endDate    = last ? fmtDate(last.date) : '—';
+  var startDisp  = fmtDate(new Date(state.startDate+'T12:00:00'));
+  var gPct       = totalTasks ? parseFloat((totalDone/totalTasks*100).toFixed(1)) : 0;
+
+  html += '<div class="phase-card stats-card">'
+    + '<div class="pc-label">📊 Resumo Geral</div>'
+    + '<div class="pc-value">'+totalDone+'/'+totalTasks+'</div>'
+    + '<div class="pc-meta">dias úteis executados</div>'
+    + '<div class="pc-bar-bg"><div class="pc-bar-fill" style="width:'+gPct+'%;background:#607D8B"></div></div>'
+    + '<div class="pc-stats"><span>Início: '+startDisp+'</span><span>Fim: '+endDate+'</span></div>'
+    + '</div>';
+
+  container.innerHTML = html;
+}
+
+// ==================== RENDER TABLE ====================
+function renderTable() {
+  var tbody = document.getElementById('scheduleBody');
+  if (!tbody) return;
+  var html = '';
+  var today = new Date(); today.setHours(0,0,0,0);
+  var curPhaseId = null;
+
+  for (var i = 0; i < state.schedule.length; i++) {
+    var item = state.schedule[i];
+
+
+    // Phase section header
+    if (item.phaseId !== curPhaseId) {
+      curPhaseId = item.phaseId;
+      var ph0 = item.phase;
+      html += '<tr class="section-row"><td colspan="10">'
+        + ph0.emoji+' '+ph0.name.toUpperCase()
+        + ' — Meta: '+ph0.rate+ph0.unit+'/dia'
+        + ' — Total: '+fmtNum(ph0.total)+ph0.unit
+        + ' — '+item.totalDays+' dias produtivos'
+        + '</td></tr>';
+    }
+
+    var isDone    = !!state.completed[item.id];
+    var itemDate  = new Date(item.date.getTime()); itemDate.setHours(0,0,0,0);
+    var isOverdue = !isDone && itemDate < today;
+    var ph        = item.phase;
+    var rowClass  = ph.id+'-row'+(isDone ? ' done-row' : '');
+
+    var badge = isDone
+      ? '<span class="badge b-done">CONCLUÍDO</span>'
+      : (isOverdue ? '<span class="badge b-overdue">⚠ ATRASADO</span>' : '<span class="badge b-pending">PENDENTE</span>');
+    if (item.isLast) badge += '<span class="badge b-last">ÚLTIMO DIA</span>';
+
+    var prodStr = fmtNum(item.production)+ph.unit+(item.isLast ? ' ★' : '');
+
+    html += '<tr class="'+rowClass+'" draggable="true"'
+      + ' data-id="'+item.id+'"'
+      + ' data-phase="'+item.phaseId+'"'
+      + ' ondragstart="dndStart(event,this)"'
+      + ' ondragover="dndOver(event,this)"'
+      + ' ondrop="dndDrop(event,this)"'
+      + ' ondragleave="dndLeave(this)"'
+      + ' ondragend="dndEnd(this)">'
+      + '<td class="td-prio"><button class="btn-promote" onclick="promoteTask(\''+item.id+'\')" title="Subir ao topo">⬆</button></td>'
+      + '<td class="td-drag">⠿</td>'
+      + '<td class="td-chk"><input type="checkbox" class="chk"'+(isDone?' checked':'')+' onchange="toggleDone(\''+item.id+'\',this)"></td>'
+      + '<td class="td-num">'+item.dayNum+'</td>'
+      + '<td class="td-date"><strong>'+fmtDate(item.date)+'</strong></td>'
+      + '<td class="td-day">'+DAYS_PT[item.date.getDay()]+'</td>'
+      + '<td class="td-act">'+ph.emoji+' '+ph.name+' '+badge+'</td>'
+      + '<td class="td-prod">'+prodStr+'</td>'
+      + '<td class="td-acum">'+fmtNum(item.accumulated)+' / '+fmtNum(ph.total)+' '+ph.unit+'</td>'
+      + '<td><span class="pct-txt" style="color:'+ph.color+'">'+item.pct+'%</span></td>'
+      + '<td><div class="mbar-bg"><div class="mbar-fill" style="width:'+item.pct+'%;background:'+ph.color+'"></div></div></td>'
+      + '</tr>';
+  }
+
+  tbody.innerHTML = html;
+}
+
+function renderCompleted() { /* items agora ficam riscados na tabela */ }
+
+// ==================== PRIORITY PANEL ====================
+function renderPriorityPanel() {
+  var panel = document.getElementById('priorityCards');
+  if (!panel) return;
+  var today = new Date(); today.setHours(0,0,0,0);
+  var html = '';
+  var allDone = true;
+
+  PHASES.forEach(function(ph) {
+    var next = null;
+    for (var i = 0; i < state.schedule.length; i++) {
+      var s = state.schedule[i];
+      if (s.type === 'task' && s.phaseId === ph.id && !state.completed[s.id]) {
+        next = s; break;
+      }
+    }
+    if (next) allDone = false;
+
+    var doneCount = 0;
+    for (var j = 0; j < state.schedule.length; j++) {
+      var s2 = state.schedule[j];
+      if (s2.type === 'task' && s2.phaseId === ph.id && state.completed[s2.id]) doneCount++;
+    }
+
+    html += '<div class="pp-card">';
+    html += '<div class="pp-card-phase" style="color:'+ph.color+'">'+ph.emoji+' '+ph.name+'</div>';
+
+    if (!next) {
+      html += '<div class="pp-card-done">✅ Fase concluída</div>';
+    } else {
+      var itemDate = new Date(next.date.getTime()); itemDate.setHours(0,0,0,0);
+      var isToday   = itemDate.getTime() === today.getTime();
+      var isOverdue = itemDate < today;
+      var dateCls   = isOverdue ? 'overdue' : (isToday ? 'today' : '');
+      var dateLabel = isToday ? '🔴 HOJE' : (isOverdue ? '⚠ ATRASADO' : fmtDate(next.date));
+
+      html += '<div class="pp-card-activity">Dia '+next.dayNum+' / '+next.totalDays+'</div>';
+      html += '<div class="pp-card-meta">Meta: '+fmtNum(next.production)+ph.unit+' &nbsp;·&nbsp; Acum: '+fmtNum(next.accumulated)+ph.unit+'</div>';
+      html += '<span class="pp-card-date '+dateCls+'">'+dateLabel+'</span>';
+      if (doneCount > 0) html += ' <span style="font-size:10px;color:#bbb">'+doneCount+' concluído'+(doneCount>1?'s':'')+'</span>';
+    }
+    html += '</div>';
+  });
+
+  panel.innerHTML = allDone
+    ? '<div class="pp-empty">🎉 Todas as atividades concluídas!</div>'
+    : html;
+}
+
+function promoteTask(id) {
+  var idx = -1;
+  for (var i = 0; i < state.taskOrder.length; i++) {
+    if (state.taskOrder[i].id === id) { idx = i; break; }
+  }
+  if (idx <= 0) return;
+  var removed = state.taskOrder.splice(idx, 1)[0];
+  state.taskOrder.unshift(removed);
+  saveState();
+  rebuildAndRender();
+  // scroll to top of table
+  var tbl = document.querySelector('.table-section');
+  if (tbl) tbl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ==================== DRAG AND DROP ====================
+var _dragId = null;
+
+function dndStart(e, row) {
+  _dragId = row.getAttribute('data-id');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', _dragId);
+  setTimeout(function(){ row.classList.add('dragging'); }, 0);
+}
+
+function dndOver(e, row) {
+  e.preventDefault();
+  if (!row.getAttribute('data-id') || row.getAttribute('data-id') === _dragId) return;
+  document.querySelectorAll('.drag-over-top').forEach(function(r){ r.classList.remove('drag-over-top'); });
+  row.classList.add('drag-over-top');
+}
+
+function dndLeave(row) {
+  row.classList.remove('drag-over-top');
+}
+
+function dndDrop(e, row) {
+  e.preventDefault();
+  row.classList.remove('drag-over-top');
+  var targetId = row.getAttribute('data-id');
+  if (!targetId || targetId === _dragId || !_dragId) return;
+
+  var srcIdx = -1, tgtIdx = -1;
+  for (var i = 0; i < state.taskOrder.length; i++) {
+    if (state.taskOrder[i].id === _dragId)   srcIdx = i;
+    if (state.taskOrder[i].id === targetId) tgtIdx = i;
+  }
+  if (srcIdx === -1 || tgtIdx === -1) return;
+
+  var removed = state.taskOrder.splice(srcIdx, 1)[0];
+  state.taskOrder.splice(tgtIdx, 0, removed);
+
+  saveState();
+  rebuildAndRender();
+}
+
+function dndEnd(row) {
+  row.classList.remove('dragging');
+  document.querySelectorAll('.drag-over-top').forEach(function(r){ r.classList.remove('drag-over-top'); });
+  _dragId = null;
+}
+
+// ==================== ACTIONS ====================
+function toggleDone(id, cb) {
+  state.completed[id] = cb.checked;
+  if (!cb.checked) delete state.completed[id];
+  saveState();
+  renderAll();
+}
+
+function undoDone(id) {
+  delete state.completed[id];
+  saveState();
+  renderAll();
+}
+
+
+function onDateChange() {
+  var val = document.getElementById('startDateInput').value;
+  if (!val) return;
+  state.startDate = val;
+  state.taskOrder = makeDefaultOrder();
+  saveState();
+  rebuildAndRender();
+}
+
+function resetOrder() {
+  state.taskOrder = makeDefaultOrder();
+  saveState();
+  rebuildAndRender();
+}
+
+function resetAll() {
+  if (!confirm('Resetar todo o progresso e ordem das tarefas?')) return;
+  state.completed = {};
+  state.taskOrder = makeDefaultOrder();
+  saveState();
+  rebuildAndRender();
+}
+
+// ==================== RENDER ALL ====================
+function rebuildAndRender() {
+  try {
+    state.schedule = buildSchedule(state.startDate, state.taskOrder);
+    renderAll();
+  } catch(e) {
+    showError('Erro ao gerar cronograma: ' + e.message);
+    console.error(e);
+  }
+}
+
+function renderAll() {
+  try { renderCards();         } catch(e){ console.error('renderCards', e); }
+  try { renderPriorityPanel(); } catch(e){ console.error('renderPriorityPanel', e); }
+  try { renderTable();         } catch(e){ console.error('renderTable', e); }
+  try { renderCompleted();     } catch(e){ console.error('renderCompleted', e); }
+}
+
+function showError(msg) {
+  var b = document.getElementById('errorBanner');
+  if (b) { b.style.display='block'; b.textContent='⚠️ '+msg; }
+}
+
+// ==================== WEATHER ====================
+var WMO_ICON = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
+var WMO_DESC = {0:'Céu limpo',1:'Poucas nuvens',2:'Parcial. nublado',3:'Nublado',45:'Neblina',48:'Neblina',51:'Garoa fraca',53:'Garoa',55:'Garoa forte',61:'Chuva fraca',63:'Chuva moderada',65:'Chuva forte',80:'Pancadas fracas',81:'Pancadas',82:'Pancadas fortes',95:'Tempestade',96:'Tempestade',99:'Tempestade'};
+
+function fetchWeather() {
+  var widget = document.getElementById('weatherWidget');
+  widget.innerHTML = '<div class="weather-msg">🔄 Buscando previsão para Recife/PE...</div>';
+
+  var url = 'https://api.open-meteo.com/v1/forecast'
+    + '?latitude=' + LAT
+    + '&longitude=' + LON
+    + '&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max'
+    + '&timezone=America%2FRecife'
+    + '&forecast_days=7';
+
+  fetch(url)
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      var daily   = data.daily;
+      var todayStr = fmtISO(new Date());
+      var days = '';
+      var alertDays = [];
+
+      for (var i = 0; i < daily.time.length; i++) {
+        var dt     = new Date(daily.time[i] + 'T12:00:00');
+        var code   = daily.weathercode[i];
+        var tMax   = Math.round(daily.temperature_2m_max[i]);
+        var tMin   = Math.round(daily.temperature_2m_min[i]);
+        var prob   = daily.precipitation_probability_max[i] || 0;
+        var mm     = parseFloat((daily.precipitation_sum[i] || 0).toFixed(1));
+        var icon   = WMO_ICON[code] || '🌤️';
+        var desc   = WMO_DESC[code] || 'Variado';
+        var isToday = daily.time[i] === todayStr;
+        var isRain  = prob >= 60;
+        if (isRain) alertDays.push(DAYS_PT[dt.getDay()]+' '+dt.getDate()+'/'+MONTHS_PT[dt.getMonth()]+' ('+prob+'%)');
+
+        days += '<div class="wd'+(isToday?' today':'')+(isRain?' rain-warn':'')+'">'+
+          '<div class="wd-date">'+(isToday?'Hoje':DAYS_PT[dt.getDay()]+' '+dt.getDate()+'/'+MONTHS_PT[dt.getMonth()])+'</div>'+
+          '<div class="wd-icon">'+icon+'</div>'+
+          '<div class="wd-desc">'+desc+'</div>'+
+          '<div class="wd-temp">'+tMax+'°/'+tMin+'°</div>'+
+          '<div class="wd-rain'+(isRain?' hi':'')+'">💧 '+prob+'%'+(mm>0?' · '+mm+'mm':'')+'</div>'+
+          '</div>';
+      }
+
+      var alert = alertDays.length
+        ? '<div class="weather-alert">⚠️ <strong>Atenção:</strong> Chuva prevista ≥60% em: '+alertDays.join(', ')+'. Verifique o cronograma.</div>'
+        : '';
+
+      var ts = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      widget.innerHTML =
+        '<div class="weather-header">'+
+          '<div><div class="weather-title">🌤️ Previsão do Tempo — 7 dias</div>'+
+          '<div class="weather-loc">📍 Rua Eduardo Antonio Amorim, 141 — Recife/PE</div></div>'+
+          '<div class="weather-ts">Atualizado às '+ts+'</div>'+
+        '</div>'+
+        '<div class="weather-days">'+days+'</div>'+
+        alert;
+    })
+    .catch(function(err) {
+      widget.innerHTML =
+        '<div class="weather-header"><div><div class="weather-title">🌤️ Previsão do Tempo</div>'+
+        '<div class="weather-loc">📍 Rua Eduardo Antonio Amorim, 141 — Recife/PE</div></div></div>'+
+        '<div class="weather-msg" style="color:#E65100">❌ Falha ao carregar. Verifique conexão e clique "Atualizar Tempo".<br><small>'+err.message+'</small></div>';
+    });
+}
+
+// ==================== INIT ====================
+function init() {
+  loadState();
+
+  var dateInput = document.getElementById('startDateInput');
+  if (dateInput) {
+    dateInput.value = state.startDate;
+    dateInput.addEventListener('change', onDateChange);
+  }
+
+  var genDate = document.getElementById('genDate');
+  if (genDate) genDate.textContent = new Date().toLocaleDateString('pt-BR');
+
+  // Validate / reset task order
+  var defaultOrder = makeDefaultOrder();
+  if (!state.taskOrder || !Array.isArray(state.taskOrder) || state.taskOrder.length !== defaultOrder.length) {
+    state.taskOrder = defaultOrder;
+    saveState();
+  } else {
+    // Refresh totalDays from config in case it changed
+    var idMap = {};
+    defaultOrder.forEach(function(t){ idMap[t.id] = t; });
+    var allValid = state.taskOrder.every(function(t){ return !!idMap[t.id]; });
+    if (!allValid) {
+      state.taskOrder = defaultOrder;
+      saveState();
+    } else {
+      state.taskOrder = state.taskOrder.map(function(t){ return Object.assign({}, t, idMap[t.id]); });
+    }
+  }
+
+  rebuildAndRender();
+  fetchWeather();
+}
+
+// Run after DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
